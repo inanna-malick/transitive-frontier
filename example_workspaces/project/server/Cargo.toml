@@ -1,0 +1,13 @@
+[package]
+name = "server"
+version = "0.1.0"
+authors = ["Inanna Malick <inanna@recursion.wtf>"]
+edition = "2018"
+
+
+[dependencies]
+futures_old = { package = "futures", version = "0.1" }
+capabilities_old = { path = "../capabilities_old" }
+
+futures = "0.3.8"
+capabilities_new = { path = "../capabilities_new" }

@@ -1,0 +1,8 @@
+[package]
+name = "library_new"
+version = "0.1.0"
+authors = ["Inanna Malick <inanna@recursion.wtf>"]
+edition = "2018"
+
+[dependencies]
+futures = "0.3.8"

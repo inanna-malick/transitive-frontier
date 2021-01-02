@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+    "capabilities_old",
+    "capabilities_new",
+    "server",
+]

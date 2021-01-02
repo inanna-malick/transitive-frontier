@@ -1,0 +1,13 @@
+[package]
+name = "transitive_frontier"
+version = "0.1.0"
+authors = ["Inanna Malick <inanna@recursion.wtf>"]
+edition = "2018"
+
+
+[dependencies]
+guppy = "0.6.2"
+structopt = "0.3.21"
+serde_json = "1.0"
+serde = "1.0"
+toml = "0.5"

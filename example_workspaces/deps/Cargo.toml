@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+    "library_old",
+    "library_new",
+]
+

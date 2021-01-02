@@ -1,0 +1,9 @@
+[package]
+name = "capabilities_new"
+version = "0.1.0"
+authors = ["Inanna Malick <inanna@recursion.wtf>"]
+edition = "2018"
+
+[dependencies]
+library_new = { path = "../../deps/library_new" }
+futures = "0.3.8"
