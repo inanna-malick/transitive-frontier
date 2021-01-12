@@ -183,6 +183,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "horrorshow"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73b84f6f364b9c35c9941a5199de16a0e8725da352eb4d4b1eb0d7179bee697a"
+
+[[package]]
 name = "indexmap"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -498,6 +504,7 @@ name = "transitive_frontier"
 version = "0.1.0"
 dependencies = [
  "guppy",
+ "horrorshow",
  "serde",
  "serde_json",
  "structopt",

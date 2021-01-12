@@ -1,5 +1,9 @@
-use guppy::graph::{DependencyDirection, PackageGraph};
+#[macro_use]
+extern crate horrorshow;
+
+use guppy::graph::{DependencyDirection, PackageGraph, PackageMetadata};
 use guppy::MetadataCommand;
+use horrorshow::helper::doctype;
 use serde::Serialize;
 use std::{collections::HashMap, error::Error, iter, path::PathBuf, str::FromStr};
 use structopt::StructOpt;
@@ -35,6 +39,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }?;
 
+
     let package_set = package_graph
         .query_reverse(iter::once(package_id))?
         .resolve_with_fn(|_, link| !opt.skip.iter().any(|s| link.to().id().repr().contains(s)));
@@ -49,30 +54,36 @@ fn main() -> Result<(), Box<dyn Error>> {
     for link in package_set.links(DependencyDirection::Reverse) {
         // != implements logical xor
         if link.to().in_workspace() != link.from().in_workspace() {
+            let dependency_source = display_name(link.from());
+
             if opt.debug {
                 let typ = if link.to().id() == package_id {
                     "direct"
                 } else {
                     "indirect"
                 };
-                eprintln!("\t*{}: {} -> {}", typ, link.from().name(), link.to().name());
+                eprintln!("\t*{}: {} -> {}", typ, &dependency_source, link.to().name());
             };
 
-            let entry = frontier
-                .entry(link.from().name().to_string())
-                .or_insert_with(Vec::new);
+            let entry = frontier.entry(dependency_source).or_insert_with(Vec::new);
             entry.push(format!("{} {}", link.to().name(), link.to().version()))
         }
     }
 
+    let target_dependency = {
+        let meta = package_graph.metadata(package_id)?;
+        format!("{} {}", meta.name(), meta.version())
+    };
+
     let out = Output {
-        package_id: format!("{}", package_id.repr()),
+        target_dependency,
         frontier,
     };
 
     let out = match opt.format {
         OutputFmt::JSON => serde_json::to_string(&out)?,
         OutputFmt::TOML => toml::to_string(&out)?,
+        OutputFmt::HTML => out.to_html(),
     };
 
     println!("{}", out);
@@ -80,13 +91,58 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+// impose kebab-case on crate names for display (standard format)
+fn display_name(m: PackageMetadata) -> String {
+    m.name().replace("_", "-")
+}
+
 // TODO/FIXME: this is an output format, but still: less 'String' types
 #[derive(Serialize)]
 struct Output {
-    // full package id for which reverse transitive dependencies were computed
-    package_id: String,
+    // dependency for which a reverse transitive dependency graph was computed
+    target_dependency: String,
     /// Map of package name to list of dependencies via which a transitive dep on 'package_id' is introduced to said package
     frontier: HashMap<String, Vec<String>>,
+}
+
+impl Output {
+    fn to_html(self) -> String {
+        let my_title: String = format!(
+            "workspace frontier for transitive dependencies on {}",
+            self.target_dependency
+        );
+        format!(
+            "{}",
+            html! {
+                : doctype::HTML;
+                html {
+                    head {
+                        title : &my_title;
+                    }
+                    body {
+                        h1(id="heading", class="title") : &my_title;
+                        p {
+                            : "TODO: short explainer/defn, copy from blog post";
+                        }
+                        ol(id="main") {
+                            @ for (k,v) in self.frontier.iter() {
+                                li(class="item") {
+                                    : format_args!("package `{}` introduces transitive dependencies on `{}` via:", k, &self.target_dependency);
+                                    ol(class="nested") {
+                                        @ for dep in v.iter() {
+                                            li(class="nested-item") {
+                                                : format_args!("dependency: `{}`", dep)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
 }
 
 #[derive(Debug, StructOpt)]
@@ -120,6 +176,7 @@ struct Opt {
 enum OutputFmt {
     TOML,
     JSON,
+    HTML,
 }
 
 impl FromStr for OutputFmt {
@@ -128,6 +185,7 @@ impl FromStr for OutputFmt {
         match s {
             "toml" => Ok(Self::TOML),
             "json" => Ok(Self::JSON),
+            "html" => Ok(Self::HTML),
             _ => Err("must be one of [toml, json]"),
         }
     }
