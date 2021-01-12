@@ -3,7 +3,13 @@ name = "transitive_frontier"
 version = "0.1.0"
 authors = ["Inanna Malick <inanna@recursion.wtf>"]
 edition = "2018"
-
+license = "MIT"
+description = "tool for auditing the locations where a dependency is introduced to a workspace"
+documentation = "https://recursion.wtf/posts/transitive-frontier/"
+repository = "https://github.com/inanna-malick/transitive-frontier"
+readme = "README.md"
+categories = ["command-line-utilities", "development-tools", "development-tools::build-utils"]
+keywords = ["cargo", "guppy", "dependencies"]
 
 [dependencies]
 guppy = "0.6.2"

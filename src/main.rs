@@ -39,7 +39,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }?;
 
-
     let package_set = package_graph
         .query_reverse(iter::once(package_id))?
         .resolve_with_fn(|_, link| !opt.skip.iter().any(|s| link.to().id().repr().contains(s)));
@@ -66,7 +65,11 @@ fn main() -> Result<(), Box<dyn Error>> {
             };
 
             let entry = frontier.entry(dependency_source).or_insert_with(Vec::new);
-            entry.push(format!("{} {}", link.to().name(), link.to().version()))
+            entry.push(format!(
+                "{} {}",
+                display_name(link.to()),
+                link.to().version()
+            ))
         }
     }
 
@@ -122,12 +125,12 @@ impl Output {
                     body {
                         h1(id="heading", class="title") : &my_title;
                         p {
-                            : "TODO: short explainer/defn, copy from blog post";
+                            : format!("Artifact showing the intersection of the workspace frontier (the set of edges in a dependency graph that originate from within a cargo workspace but do not terminate in that cargo workspace) and the reverse transitive dependency graph for {} - that is, the places where dependencies on some target package are introduced into a cargo workspace.", self.target_dependency)
                         }
                         ol(id="main") {
                             @ for (k,v) in self.frontier.iter() {
                                 li(class="item") {
-                                    : format_args!("package `{}` introduces transitive dependencies on `{}` via:", k, &self.target_dependency);
+                                    : format_args!("package `{}` introduces transitive dependencies on `{}` via these deps:", k, &self.target_dependency);
                                     ol(class="nested") {
                                         @ for dep in v.iter() {
                                             li(class="nested-item") {
