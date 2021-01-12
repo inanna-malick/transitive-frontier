@@ -125,13 +125,13 @@ impl Output {
                     body {
                         h1(id="heading", class="title") : &my_title;
                         p {
-                            : format!("Artifact showing the intersection of the workspace frontier (the set of edges in a dependency graph that originate from within a cargo workspace but do not terminate in that cargo workspace) and the reverse transitive dependency graph for {} - that is, the places where dependencies on some target package are introduced into a cargo workspace.", self.target_dependency)
+                            : format!("Artifact showing the intersection of the workspace frontier (the set of edges in a dependency graph that originate from within a cargo workspace but do not terminate in that cargo workspace) and the reverse transitive dependency graph for `{}` - that is, the places where dependencies on `{}` are introduced into the cargo workspace.", self.target_dependency, self.target_dependency)
                         }
-                        ol(id="main") {
+                        ul(id="main") {
                             @ for (k,v) in self.frontier.iter() {
                                 li(class="item") {
                                     : format_args!("package `{}` introduces transitive dependencies on `{}` via these deps:", k, &self.target_dependency);
-                                    ol(class="nested") {
+                                    ul(class="nested") {
                                         @ for dep in v.iter() {
                                             li(class="nested-item") {
                                                 : format_args!("dependency: `{}`", dep)
